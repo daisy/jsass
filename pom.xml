@@ -1,10 +1,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
-    <groupId>io.bit3</groupId>
-    <artifactId>jsass</artifactId>
-    <version>4.1.0</version>
-    <packaging>jar</packaging>
+    
+    <parent>
+        <groupId>org.daisy</groupId>
+        <artifactId>daisy</artifactId>
+        <version>2</version>
+        <relativePath />
+    </parent>
+    
+    <groupId>org.daisy.libs</groupId>
+    <artifactId>io.bit3.jsass</artifactId>
+    <version>4.1.0-1-SNAPSHOT</version>
+    <packaging>bundle</packaging>
 
     <name>${project.groupId}:${project.artifactId}</name>
     <description>SASS compiler using libsass.</description>
@@ -50,7 +57,19 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-
+    
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.daisy.pipeline</groupId>
+                <artifactId>framework-bom</artifactId>
+                <version>1.10.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+    
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
@@ -66,7 +85,6 @@
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.4</version>
         </dependency>
     </dependencies>
 
@@ -149,6 +167,12 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>3.0.1</version>
+                <extensions>true</extensions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
