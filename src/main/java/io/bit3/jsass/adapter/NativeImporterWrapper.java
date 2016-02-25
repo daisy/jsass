@@ -5,6 +5,7 @@ import io.bit3.jsass.importer.Import;
 import io.bit3.jsass.importer.Importer;
 import io.bit3.jsass.importer.JsassCustomHeaderImporter;
 
+import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
@@ -23,8 +24,9 @@ class NativeImporterWrapper {
   public Collection<NativeImport> apply(String url, NativeImport previousNative) {
     try {
       Import previous = new Import(
-          previousNative.importPath,
-          previousNative.absolutePath,
+          // importPath and absolutePath are possibly file paths and not valid URIs
+          pathToUri(previousNative.importPath),
+          pathToUri(previousNative.absolutePath),
           previousNative.contents,
           previousNative.sourceMap
       );
@@ -57,6 +59,15 @@ class NativeImporterWrapper {
       throwable.printStackTrace(System.err);
       NativeImport nativeImport = new NativeImport(throwable);
       return Collections.singletonList(nativeImport);
+    }
+  }
+
+  private static URI pathToUri(String path) throws URISyntaxException {
+    File file = new File(path);
+    if (file.exists()) {
+      return file.toURI();
+    } else {
+      return new URI(path);
     }
   }
 
