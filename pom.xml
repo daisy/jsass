@@ -10,7 +10,7 @@
     
     <groupId>org.daisy.libs</groupId>
     <artifactId>io.bit3.jsass</artifactId>
-    <version>4.1.0-1-SNAPSHOT</version>
+    <version>4.1.0-p1</version>
     <packaging>bundle</packaging>
 
     <name>${project.groupId}:${project.artifactId}</name>
