@@ -1,27 +1,17 @@
 package io.bit3.jsass;
 
-import static io.bit3.jsass.Assert.assertSuccessful;
-
-import org.apache.commons.io.IOUtils;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 
-@RunWith(Parameterized.class)
-public class CompileFileTest {
+public class CompileFileTest extends AbstractCompileTest {
 
-  private String syntax;
-  private OutputStyle outputStyle;
   private Compiler compiler;
   private Options options;
   private File sourceFile;
@@ -34,13 +24,9 @@ public class CompileFileTest {
 
   /**
    * Create test running with specific syntax and output style.
-   *
-   * @param syntax      The syntax (scss or sass).
-   * @param outputStyle The output style.
    */
-  public CompileFileTest(String syntax, OutputStyle outputStyle) {
-    this.syntax = syntax;
-    this.outputStyle = outputStyle;
+  public CompileFileTest() {
+    super();
   }
 
   /**
@@ -48,7 +34,6 @@ public class CompileFileTest {
    *
    * <p>This data contain a set of syntax (scss or sass) and output style in all combinations.</p>
    */
-  @Parameterized.Parameters
   public static Collection<Object[]> data() {
     return Arrays.asList(
         new Object[][]{
@@ -67,8 +52,7 @@ public class CompileFileTest {
    *
    * @throws URISyntaxException Throws if the resource URI is invalid.
    */
-  @Before
-  public void setUp() throws URISyntaxException {
+  private void setUp() throws URISyntaxException {
     compiler = new Compiler();
 
     String incPath = String.format("/%s/inc", syntax);
@@ -76,7 +60,7 @@ public class CompileFileTest {
 
     options = new Options();
     options.getIncludePaths().add(new File(incUrl.toURI()));
-    options.getFunctionProviders().add(new TestFunctions());
+    options.getFunctionProviders().add(testFunctions);
     options.getImporters().add(new TestImporter());
 
     String sourcePath = String.format("/%s/input.%s", syntax, syntax);
@@ -123,7 +107,7 @@ public class CompileFileTest {
   /**
    * Clean up temporary directory after test completion.
    */
-  @After
+  @AfterEach
   public void tearDown() {
     if (null != targetDir && targetDir.exists()) {
       File[] files = targetDir.listFiles();
@@ -137,8 +121,13 @@ public class CompileFileTest {
     }
   }
 
-  @Test
-  public void testWithoutMap() throws Exception {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testWithoutMap(String syntax, OutputStyle outputStyle) throws Exception {
+    this.syntax = syntax;
+    this.outputStyle = outputStyle;
+    this.setUp();
+
     File targetCssFile = new File(targetCssWithoutMapFile.toURI());
 
     try {
@@ -146,15 +135,19 @@ public class CompileFileTest {
 
       Output output = compiler.compileFile(sourceFile.toURI(), targetCssFile.toURI(), options);
 
-      assertSuccessful(output, syntax, outputStyle);
       assertEquals(output.getCss(), expectedCssWithoutMapUrl);
     } finally {
       targetCssFile.delete();
     }
   }
 
-  @Test
-  public void testWithMap() throws Exception {
+  @ParameterizedTest
+  @MethodSource("data")
+  public void testWithMap(String syntax, OutputStyle outputStyle) throws Exception {
+    this.syntax = syntax;
+    this.outputStyle = outputStyle;
+    this.setUp();
+
     File targetCssFile = new File(targetCssWithMapFile.toURI());
     File targetMapFile = new File(targetSourceMapFile.toURI());
 
@@ -164,21 +157,10 @@ public class CompileFileTest {
 
       Output output = compiler.compileFile(sourceFile.toURI(), targetCssFile.toURI(), options);
 
-      assertSuccessful(output, syntax, outputStyle);
       assertEquals(output.getCss(), expectedCssWithMapUrl);
     } finally {
       targetCssFile.delete();
       targetMapFile.delete();
     }
-  }
-
-  private void assertEquals(String actual, URL expectedSource) throws IOException {
-    String expected = IOUtils.toString(expectedSource);
-
-    Assert.assertEquals(
-        String.format("Compile input.%s into %s output format failed", syntax, outputStyle),
-        expected,
-        actual
-    );
   }
 }

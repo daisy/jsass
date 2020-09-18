@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 if [[ -z "$(which docker)" ]]; then
     echo "The linux build require docker"
     exit 1
@@ -13,8 +15,5 @@ fi
 DIR=$(dirname $(dirname $(realpath "$0")))
 cd "$DIR"
 
-# Install docker container
-gradle buildDockerBuildLinux64
-
 # Compile binaries
-gradle buildNativeLinux64Libs
+./gradlew --no-daemon -g /tmp buildNativeLinux64Libs

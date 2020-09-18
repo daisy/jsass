@@ -1,19 +1,16 @@
-language: java
-
-jdk:
-  - oraclejdk8
+language: shell
 
 sudo: required
 
-services:
-  - docker
+git:
+  submodules: false
 
-before_install:
-  - docker pull bit3/jsass-test-centos5
-  - docker pull bit3/jsass-test-centos6
-  - docker pull bit3/jsass-test-centos7
-  - docker pull bit3/jsass-test-ubuntu12.04
-  - docker pull bit3/jsass-test-ubuntu14.04
+matrix:
+  include:
+    - os: osx
+    - os: windows
+
+install: true
 
 script:
-  - gradle check
+  - ./.travis_script.sh

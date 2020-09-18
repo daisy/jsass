@@ -13,7 +13,7 @@ extern "C" {
  * Signature: (Lio/bit3/jsass/adapter/NativeFileContext;)Lio/bit3/jsass/Output;
  */
 JNIEXPORT jobject JNICALL Java_io_bit3_jsass_adapter_NativeAdapter_compileFile
-  (JNIEnv *, jobject, jobject);
+  (JNIEnv *, jclass, jobject);
 
 /*
  * Class:     io_bit3_jsass_adapter_NativeAdapter
@@ -21,7 +21,15 @@ JNIEXPORT jobject JNICALL Java_io_bit3_jsass_adapter_NativeAdapter_compileFile
  * Signature: (Lio/bit3/jsass/adapter/NativeStringContext;)Lio/bit3/jsass/Output;
  */
 JNIEXPORT jobject JNICALL Java_io_bit3_jsass_adapter_NativeAdapter_compileString
-  (JNIEnv *, jobject, jobject);
+  (JNIEnv *, jclass, jobject);
+
+/*
+ * Class:     io_bit3_jsass_adapter_NativeAdapter
+ * Method:    sass2scss
+ * Signature: (Ljava/lang/String;I)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_io_bit3_jsass_adapter_NativeAdapter_sass2scss
+  (JNIEnv *, jclass, jstring, jint);
 
 #ifdef __cplusplus
 }

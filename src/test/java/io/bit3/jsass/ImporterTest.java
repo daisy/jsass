@@ -1,13 +1,8 @@
 package io.bit3.jsass;
 
-import static io.bit3.jsass.Assert.assertSuccessful;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertFalse;
-
 import io.bit3.jsass.importer.Import;
-
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.net.URI;
@@ -15,6 +10,9 @@ import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class ImporterTest {
 
@@ -26,7 +24,7 @@ public class ImporterTest {
    *
    * @throws URISyntaxException Throws if the resource URI is invalid.
    */
-  @Before
+  @BeforeEach
   public void setUp() throws IOException, URISyntaxException {
     compiler = new Compiler();
     options = new Options();
@@ -48,7 +46,6 @@ public class ImporterTest {
         options
     );
 
-    assertSuccessful(output, "scss", options.getOutputStyle());
     assertFalse(functions.calls == 0);
     assertFalse(importer.importPaths.isEmpty());
 

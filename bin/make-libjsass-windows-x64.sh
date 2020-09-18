@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 if [[ -z "$(which docker)" ]]; then
     echo "The windows build require docker"
     exit 1
@@ -13,8 +15,5 @@ fi
 DIR=$(dirname $(dirname $(realpath "$0")))
 cd "$DIR"
 
-# Install docker container
-gradle buildDockerBuildWindows64
-
 # Compile binaries
-gradle buildNativeWindows64Libs
+./gradlew --no-daemon -g /tmp buildNativeWindows64Libs

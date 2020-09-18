@@ -2,6 +2,7 @@ package io.bit3.jsass.adapter;
 
 import io.bit3.jsass.context.ImportStack;
 import io.bit3.jsass.importer.Import;
+import io.bit3.jsass.importer.ImportException;
 import io.bit3.jsass.importer.Importer;
 import io.bit3.jsass.importer.JsassCustomHeaderImporter;
 
@@ -12,7 +13,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 class NativeImporterWrapper {
+  private static final Logger LOG = LoggerFactory.getLogger(NativeImporterWrapper.class);
+
   private final ImportStack importStack;
   private final Importer importer;
 
@@ -56,7 +62,7 @@ class NativeImporterWrapper {
 
       return nativeImports;
     } catch (Throwable throwable) {
-      throwable.printStackTrace(System.err);
+      LOG.warn(throwable.getMessage(), throwable);
       NativeImport nativeImport = new NativeImport(throwable);
       return Collections.singletonList(nativeImport);
     }
@@ -79,7 +85,7 @@ class NativeImporterWrapper {
     // $jsass-void: jsass_import_stack_push(<id>) !global;
     preSource.append(
         String.format(
-            "$jsass-void: jsass_import_stack_push(%d) !global;\n",
+            "$jsass-void: jsass_import_stack_push(%d) !global;%n",
             id
         )
     );
@@ -93,15 +99,17 @@ class NativeImporterWrapper {
           )
       );
     } catch (URISyntaxException e) {
-      throw new RuntimeException(e);
+      throw new ImportException(e);
     }
   }
 
-  private NativeImport createPostImport(Import importSource) {
+  private static NativeImport createPostImport(Import importSource) {
     StringBuilder postSource = new StringBuilder();
 
     // $jsass-void: jsass_import_stack_pop() !global;
-    postSource.append("$jsass-void: jsass_import_stack_pop() !global;\n");
+    postSource
+        .append("$jsass-void: jsass_import_stack_pop() !global;")
+        .append(System.lineSeparator());
 
     try {
       return new NativeImport(
@@ -112,7 +120,7 @@ class NativeImporterWrapper {
           )
       );
     } catch (URISyntaxException e) {
-      throw new RuntimeException(e);
+      throw new ImportException(e);
     }
   }
 }
