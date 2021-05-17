@@ -1,5 +1,7 @@
 import java.nio.file.Paths
 import java.nio.file.Path
+import java.util.regex.Matcher
+import java.util.regex.Pattern;
 
 buildscript {
     repositories {
@@ -87,7 +89,7 @@ test {
 
 release {
     git {
-        requireBranch = 'master|develop'
+        requireBranch = 'org.daisy.libs'
     }
 }
 
@@ -403,4 +405,53 @@ task runDockerTestUbuntu1604 {
         println 'Run Docker ubuntu 16.04 test container'
         runDockerContainer('test-ubuntu16.04')
     }
+}
+
+ext.replaceEnv = { string ->
+  Matcher m = Pattern.compile("^\\\$\\{env\\.(?<var>.+)\\}\$").matcher(string);
+  if (m.matches()) {
+    println 'Substituting environment variable ' + m.group("var") + ' in "' + string + '"'
+    return System.getenv(m.group("var"))
+  } else {
+    return string
+  }
+}
+
+uploadArchives {
+  repositories {
+    mavenDeployer {
+      beforeDeployment { MavenDeployment deployment ->
+        signing.signPom(deployment)
+      }
+      repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+        authentication(userName: "ignored")
+      }
+    }
+    // settings.xml is not automatically consulted for authentication settings
+    // this workaround is taken from https://issues.gradle.org/browse/GRADLE-1039
+    doFirst {
+      def settings = new File(System.getProperty('user.home') + '/.m2/settings.xml')
+      if (settings.exists()) {
+        def xml = new XmlSlurper().parse(settings)
+        def serverID = !version.endsWith("SNAPSHOT") ? 'sonatype-nexus-staging' : 'sonatype-nexus-snapshots'
+        def server = xml.servers.children().find({ it.id.text() == serverID })
+        if (server) {
+          def mavenUsername = replaceEnv(server.username.text())
+          def mavenPassword = replaceEnv(server.password.text())
+          println 'Found server definition "' + serverID + '", username: ' + mavenUsername
+          if (!version.endsWith("SNAPSHOT")) {
+            repositories.mavenDeployer.repository.authentication.userName = mavenUsername
+            repositories.mavenDeployer.repository.authentication.password = mavenPassword
+          } else {
+            repositories.mavenDeployer.snapshotRepository.authentication.userName = mavenUsername
+            repositories.mavenDeployer.snapshotRepository.authentication.password = mavenPassword
+          }
+        } else {
+          println 'No server definition "' + serverID + '" was found in ' + settings
+        }
+      } else {
+        println 'Maven settings file was not found: ' + settings
+      }
+    }
+  }
 }
