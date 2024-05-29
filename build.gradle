@@ -289,15 +289,9 @@ publishing {
 }
 
 // signing artifacts
-if (project.hasProperty("signing.gnupg.keyName") && project.hasProperty("signing.gnupg.passphrase")) {
-    signing {
-        useGpgCmd()
-        sign publishing.publications.maven
-    }
-} else if (project.hasProperty("signing.keyId") && project.hasProperty("signing.password")) {
-    signing {
-        sign publishing.publications.maven
-    }
+signing {
+    useGpgCmd()
+    sign publishing.publications.maven
 }
 
 // -----------------------------------------------------------------------------
